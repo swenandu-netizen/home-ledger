@@ -84,6 +84,7 @@
         }
         .main-balance-card h3 { margin: 0 0 4px 0; font-size: 13px; opacity: 0.9; }
         .main-balance-card span { font-size: 28px; font-weight: bold; }
+        .main-balance-card small { display: block; font-size: 11px; margin-top: 4px; opacity: 0.8; }
 
         .summary-box { 
             display: grid; 
@@ -210,7 +211,6 @@
         .progress-container { margin: 8px 0; background: var(--border-color); border-radius: 6px; overflow: hidden; height: 12px; }
         .progress-bar { height: 100%; background: #007bff; width: 0%; transition: 0.3s; }
 
-        /* अब पॉप-अप बॉक्स काफी बड़ा, चौड़ा और स्पष्ट दिखेगा */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.65); z-index: 9999; display: none;
@@ -253,11 +253,11 @@
 </head>
 <body data-theme="light">
 
-<!-- लॉक मोडल -->
+<!-- लॉक मोडल (लॉगिन पिन: 1123) -->
 <div id="lockModal" class="modal-overlay" style="display: flex;">
     <div class="modal-box">
-        <h3 id="lockTitle">🔒 ऐप लॉक</h3>
-        <p id="lockDesc">अपना 4-अंकों का लॉगिन पिन दर्ज करें</p>
+        <h3>🔒 ऐप लॉक</h3>
+        <p>कृपया अपना 4-अंकों का लॉगिन पिन दर्ज करें (1123):</p>
         <input type="password" id="modalPinInput" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 10px;">
         <button onclick="submitLockPin()" class="submit-btn" style="margin-top: 15px;">अनलॉक करें</button>
     </div>
@@ -324,7 +324,7 @@
     </div>
 </div>
 
-<!-- प्रॉम्प्ट मोडल -->
+<!-- प्रॉम्प्ट मोडल (ट्रांजैक्शन पिन: 4511) -->
 <div id="promptModal" class="modal-overlay">
     <div class="modal-box">
         <h3 id="promptTitle">सुरक्षा जाँच</h3>
@@ -579,24 +579,18 @@
         document.getElementById(modalId).style.display = 'none';
     }
 
-    if (!localStorage.getItem('loginPin')) {
-        document.getElementById('lockTitle').innerText = "🆕 नया लॉगिन पिन सेट करें";
-    }
+    // फोर्सफुल रीसेट ताकि पुराना पिन हटकर नया 1123 और 4511 सेट हो जाए
+    localStorage.setItem('loginPin', '1123');
+    localStorage.setItem('txnPin', '4511');
 
     function submitLockPin() {
         const entered = document.getElementById('modalPinInput').value;
-        const saved = localStorage.getItem('loginPin');
-        if (!saved) {
-            if (entered.length === 4) {
-                localStorage.setItem('loginPin', entered);
-                if(!localStorage.getItem('txnPin')) localStorage.setItem('txnPin', '5678');
-                showToast('✔ पिन सेट हो गया! (Txn PIN: 5678)');
-                document.getElementById('lockModal').style.display = 'none';
-            } else { showToast('4 अंकों का पिन दर्ज करें', true); }
-        } else {
-            if (entered === saved) {
-                document.getElementById('lockModal').style.display = 'none';
-            } else { showToast('❌ गलत पिन!', true); document.getElementById('modalPinInput').value = ''; }
+        const saved = localStorage.getItem('loginPin') || '1123';
+        if (entered === saved) {
+            document.getElementById('lockModal').style.display = 'none';
+        } else { 
+            showToast('❌ गलत लॉगिन पिन! (सही पिन: 1123)', true); 
+            document.getElementById('modalPinInput').value = ''; 
         }
     }
 
@@ -610,18 +604,18 @@
     function verifyTxnPin(callback) {
         const modal = document.getElementById('promptModal');
         document.getElementById('promptTitle').innerText = "🔒 सुरक्षा जाँच";
-        document.getElementById('promptDesc').innerText = "अपना 4-अंकों का ट्रांजैक्शन पिन दर्ज करें:";
+        document.getElementById('promptDesc').innerText = "अपना 4-अंकों का ट्रांजैक्शन पिन दर्ज करें (4511):";
         document.getElementById('promptInputsContainer').innerHTML = `<input type="password" id="customTxnPin" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 10px;">`;
         modal.style.display = 'flex';
 
         document.getElementById('promptSubmitBtn').onclick = function() {
             const val = document.getElementById('customTxnPin').value;
-            const correctPin = localStorage.getItem('txnPin') || '5678';
+            const correctPin = localStorage.getItem('txnPin') || '4511';
             if (val === correctPin) {
                 modal.style.display = 'none';
                 callback();
             } else {
-                showToast('❌ गलत पिन!', true);
+                showToast('❌ गलत ट्रांजैक्शन पिन! (सही पिन: 4511)', true);
             }
         };
     }
@@ -629,7 +623,7 @@
     function openResetPinModal() {
         const modal = document.getElementById('promptModal');
         document.getElementById('promptTitle').innerText = "🔑 पिन बदलें";
-        document.getElementById('promptDesc').innerText = "पुराना और नए पिन दर्ज करें:";
+        document.getElementById('promptDesc').innerText = "पुराना लॉगिन पिन और नए पिन दर्ज करें:";
         document.getElementById('promptInputsContainer').innerHTML = `
             <input type="password" id="oldLogin" placeholder="पुराना लॉगिन पिन" maxlength="4" style="margin-bottom:8px;">
             <input type="password" id="newLogin" placeholder="नया लॉगिन पिन (4 अंक)" maxlength="4" style="margin-bottom:8px;">
@@ -641,12 +635,12 @@
             const oLog = document.getElementById('oldLogin').value;
             const nLog = document.getElementById('newLogin').value;
             const nTxn = document.getElementById('newTxn').value;
-            if (oLog === localStorage.getItem('loginPin') && nLog.length === 4 && nTxn.length === 4) {
+            if (oLog === (localStorage.getItem('loginPin') || '1123') && nLog.length === 4 && nTxn.length === 4) {
                 localStorage.setItem('loginPin', nLog);
                 localStorage.setItem('txnPin', nTxn);
                 modal.style.display = 'none';
-                showToast('✔ पिन बदल गया!');
-            } else { showToast('❌ पिन गलत हैं', true); }
+                showToast('✔ पिन सफलतापूर्व बदल गया!');
+            } else { showToast('❌ पिन गलत हैं या 4 अंक के नहीं हैं', true); }
         };
     }
 
