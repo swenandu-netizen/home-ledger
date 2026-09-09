@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Ledger - Pro Financial Manager</title>
+    
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #ddd;
+            --input-bg: #fff;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f1f1f1;
+            --border-color: #444;
+            --input-bg: #2d2d2d;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 10px; 
+            transition: 0.3s; 
+            padding-bottom: 85px; 
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 850px; 
+            margin: auto; 
+            background: var(--card-bg); 
+            padding: 15px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12); 
+        }
+
+        @media (min-width: 768px) {
+            .container { padding: 25px; margin-top: 15px; }
+            body { padding: 20px; }
+        }
+
+        .header-flex { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        h2 { color: var(--text-color); margin: 0; font-size: 20px; }
+        
+        .theme-circle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .main-balance-card {
+            background: linear-gradient(135deg, #6f42c1, #5a32a3);
+            color: white;
+            padding: 18px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 15px rgba(111,66,193,0.35);
+        }
+        .main-balance-card h3 { margin: 0 0 4px 0; font-size: 13px; opacity: 0.9; }
+        .main-balance-card span { font-size: 28px; font-weight: bold; }
+
+        .summary-box { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; 
+            margin: 12px 0; 
+        }
+        .card { 
+            padding: 14px 8px; 
+            border-radius: 12px; 
+            text-align: center; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: transform 0.1s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        .card:active { transform: scale(0.96); }
+        .card.income { background: #17a2b8; }
+        .card.expense { background: #007bff; }
+        .card.lena { background: #d9534f; }
+        .card.dena { background: #28a745; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        @media (min-width: 700px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+                align-items: stretch;
+            }
+        }
+
+        .action-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: space-between;
+        }
+        .action-box small { text-align: center; font-weight: bold; }
+
+        input, select, button { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 6px 0; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            background: var(--input-bg); 
+            color: var(--text-color); 
+            font-size: 15px; 
+        }
+        
+        .submit-btn { 
+            background: #28a745; 
+            color: white; 
+            font-size: 16px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+            padding: 14px;
+        }
+        .submit-btn:hover { background: #218838; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .nav-bar {
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%;
+            background: var(--card-bg); 
+            border-top: 1px solid var(--border-color);
+            display: flex; 
+            justify-content: space-around; 
+            padding: 8px 0;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); 
+            z-index: 100;
+        }
+        .nav-item {
+            background: none; 
+            border: none; 
+            color: var(--text-color);
+            font-size: 11px; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 25%;
+        }
+        .nav-item span { font-size: 16px; margin-bottom: 2px; }
+        .nav-item.active { color: #28a745; font-weight: bold; }
+
+        .tools-bar { display: flex; gap: 6px; margin: 10px 0; }
+        .tools-bar input, .tools-bar select { margin: 0; padding: 10px; font-size: 14px; }
+
+        .transaction-list { margin-top: 12px; max-height: 280px; overflow-y: auto; }
+        .item { 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .item-info strong { font-size: 15px; }
+        .item-info small { color: #888; display: block; font-size: 12px; }
+        .item-right { text-align: right; }
+        .text-income { color: #17a2b8; font-weight: bold; font-size: 15px; }
+        .text-lena { color: #d9534f; font-weight: bold; font-size: 15px; }
+        .text-dena { color: #28a745; font-weight: bold; font-size: 15px; }
+        
+        .btn-group { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
+        .del-btn { background: #ff4d4d; border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .edit-btn { background: #f0ad4e; border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        .progress-container { margin: 8px 0; background: var(--border-color); border-radius: 6px; overflow: hidden; height: 12px; }
+        .progress-bar { height: 100%; background: #007bff; width: 0%; transition: 0.3s; }
+
+        /* अब पॉप-अप बॉक्स काफी बड़ा, चौड़ा और स्पष्ट दिखेगा */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.65); z-index: 9999; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--card-bg); padding: 30px; border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 100%; max-width: 480px; text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .modal-box h3 { margin-top: 0; color: var(--text-color); font-size: 22px; margin-bottom: 15px; }
+        .modal-box p { font-size: 14px; color: #888; margin-bottom: 15px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-size: 15px; }
+        .modal-btn.primary { background: #28a745; color: white; }
+        .modal-btn.secondary { background: #d9534f; color: white; }
+        .modal-btn.cancel { background: #ccc; color: #333; }
+
+        #toast { 
+            visibility: hidden; 
+            min-width: 250px; 
+            background-color: #333; 
+            color: #fff; 
+            text-align: center; 
+            border-radius: 8px; 
+            padding: 12px; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 50%; 
+            bottom: 75px; 
+            transform: translateX(-50%); 
+            font-size: 14px; 
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.3); 
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 75px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 75px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    </style>
+</head>
+<body data-theme="light">
+
+<!-- लॉक मोडल -->
+<div id="lockModal" class="modal-overlay" style="display: flex;">
+    <div class="modal-box">
+        <h3 id="lockTitle">🔒 ऐप लॉक</h3>
+        <p id="lockDesc">अपना 4-अंकों का लॉगिन पिन दर्ज करें</p>
+        <input type="password" id="modalPinInput" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 10px;">
+        <button onclick="submitLockPin()" class="submit-btn" style="margin-top: 15px;">अनलॉक करें</button>
+    </div>
+</div>
+
+<!-- सैलरी पॉप-अप -->
+<div id="salaryModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>💰 सैलरी / कमाई जोड़ें</h3>
+        <form id="salaryForm" onsubmit="handleFormSubmit(event, 'Salary')">
+            <input type="text" id="sl_name" placeholder="स्रोत का नाम (जैसे: कंपनी सैलरी)" required>
+            <input type="number" id="sl_amount" placeholder="रकम (₹)" required>
+            <input type="date" id="sl_date" required>
+            <input type="text" id="sl_note" placeholder="नोट / महीना (वैकल्पिक)">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="button" class="modal-btn cancel" onclick="closeModal('salaryModal')" style="margin:0;">रद्द करें</button>
+                <button type="submit" class="modal-btn primary" style="margin:0;">सेव करें</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- उधारी पॉप-अप -->
+<div id="lendenModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>👥 उधारी (दिया / लिया) जोड़ें</h3>
+        <form id="lendenForm" onsubmit="handleFormSubmit(event, 'Lenden')">
+            <input type="text" id="ld_name" placeholder="व्यक्ति का नाम" required>
+            <select id="ld_type">
+                <option value="Lena">लेना है (क्रेडिट - जेब से गया)</option>
+                <option value="Dena">देना है (डेबिट - जेब में आया)</option>
+            </select>
+            <input type="number" id="ld_amount" placeholder="रकम (₹)" required>
+            <input type="date" id="ld_date" required>
+            <input type="text" id="ld_note" placeholder="वजह (वैकल्पिक)">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="button" class="modal-btn cancel" onclick="closeModal('lendenModal')" style="margin:0;">रद्द करें</button>
+                <button type="submit" class="modal-btn primary" style="margin:0;">सेव करें</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- खर्च पॉप-अप -->
+<div id="kharchModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>🛒 घर का खर्च जोड़ें</h3>
+        <form id="kharchForm" onsubmit="handleFormSubmit(event, 'Kharch')">
+            <input type="text" id="kh_name" placeholder="कहाँ खर्च किया" required>
+            <input type="number" id="kh_amount" placeholder="रकम (₹)" required>
+            <select id="kh_category">
+                <option value="Grocery">किराना / ग्रोसरी</option>
+                <option value="Bills">बिजली बिल / अन्य</option>
+                <option value="Medical">मेडिकल / दवाई</option>
+                <option value="OtherKharch">अन्य खर्च</option>
+            </select>
+            <input type="date" id="kh_date" required>
+            <input type="text" id="kh_note" placeholder="नोट (वैकल्पिक)">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="button" class="modal-btn cancel" onclick="closeModal('kharchModal')" style="margin:0;">रद्द करें</button>
+                <button type="submit" class="modal-btn primary" style="margin:0;">सेव करें</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- प्रॉम्प्ट मोडल -->
+<div id="promptModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 id="promptTitle">सुरक्षा जाँच</h3>
+        <p id="promptDesc">पिन दर्ज करें</p>
+        <div id="promptInputsContainer"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closePromptModal()">रद्द करें</button>
+            <button class="modal-btn primary" id="promptSubmitBtn">ठीक है</button>
+        </div>
+    </div>
+</div>
+
+<!-- कन्फर्म मोडल -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>⚠️ पुष्टि करें</h3>
+        <p id="confirmText">क्या आप यह कार्रवाई करना चाहते हैं?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeConfirmModal()">नहीं</button>
+            <button class="modal-btn secondary" id="confirmYesBtn">हाँ</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="header-flex">
+        <h2>🏠 Home Ledger</h2>
+        <button class="theme-circle-btn" id="themeIconBtn" onclick="toggleTheme()" title="थीम बदलें">🌙</button>
+    </div>
+
+    <!-- डैशबोर्ड स्क्रीन -->
+    <div id="screen-dashboard" class="screen active">
+        
+        <!-- पॉकेट बैलेंस कार्ड -->
+        <div class="main-balance-card">
+            <h3>हाथ में बचा नकद (Pocket Balance)</h3>
+            <span id="totalBalance">₹0</span>
+            <small id="totalWealthText" style="display:block; margin-top:4px; opacity:0.9;">कुल संपत्ति: ₹0</small>
+        </div>
+
+        <!-- 4 बड़े बटन -->
+        <div class="summary-box">
+            <div class="card income" onclick="openModal('salaryModal')">सैलरी<br><span id="totalIncome" style="font-size: 15px;">₹0</span></div>
+            <div class="card expense" onclick="openModal('kharchModal')">खर्च<br><span id="totalKharchCard" style="font-size: 15px;">₹0</span></div>
+            <div class="card lena" onclick="openModal('lendenModal')">लेना<br><span id="totalLena" style="font-size: 15px;">₹0</span></div>
+            <div class="card dena" onclick="openModal('lendenModal')">देना<br><span id="totalDena" style="font-size: 15px;">₹0</span></div>
+        </div>
+        
+        <!-- स्मार्ट ग्रिड -->
+        <div class="dashboard-grid">
+            <div class="action-box">
+                <small><b>घरेलू खर्च वितरण:</b></small>
+                <div class="progress-container"><div id="expenseBar" class="progress-bar"></div></div>
+                <span id="expenseSummaryText" style="font-size: 12px; color: #888;">कुल खर्च: ₹0</span>
+                <div style="display: flex; gap: 6px; margin-top: 5px;">
+                    <button class="action-btn" onclick="exportPDF()" style="margin:0; background:var(--input-bg);">📥 PDF</button>
+                    <button class="action-btn" onclick="shareWhatsApp()" style="margin:0; background:#25d366; color:white; border:none;">💬 WhatsApp</button>
+                </div>
+            </div>
+
+            <div class="action-box">
+                <small>सेटिंग्स & डेटा</small>
+                <button class="action-btn" onclick="exportJSON()" style="margin:0; background:var(--input-bg);">💾 बैकअप</button>
+                <button class="action-btn" onclick="openResetPinModal()" style="margin:0; background:#007bff; color:white; border:none;">🔑 पिन बदलें</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- सैलरी टैब -->
+    <div id="screen-salary" class="screen">
+        <h3>💰 सैलरी इतिहास (History)</h3>
+        <div class="tools-bar">
+            <input type="text" id="searchSalary" placeholder="🔍 सैलरी खोजें..." oninput="filterAndRender()">
+            <button onclick="openModal('salaryModal')" class="action-btn" style="background:#17a2b8; color:white; width: auto; padding: 10px 18px;">+ नई सैलरी</button>
+        </div>
+        <div class="transaction-list"><div id="salaryHistory">डेटा लोड हो रहा है...</div></div>
+    </div>
+
+    <!-- उधारी टैब -->
+    <div id="screen-lenden" class="screen">
+        <h3>👥 उधारी इतिहास (History)</h3>
+        <div class="tools-bar">
+            <input type="text" id="searchLenden" placeholder="🔍 नाम से खोजें..." oninput="filterAndRender()">
+            <button onclick="openModal('lendenModal')" class="action-btn" style="background:#d9534f; color:white; width: auto; padding: 10px 18px;">+ नई उधारी</button>
+        </div>
+        <div class="tools-bar" style="margin-top:0;">
+            <select id="filterMonthLenden" onchange="filterAndRender()">
+                <option value="all">सभी महीने</option>
+                <option value="current">इस महीने का</option>
+            </select>
+        </div>
+        <div class="transaction-list"><div id="lendenHistory">डेटा लोड हो रहा है...</div></div>
+    </div>
+
+    <!-- घर खर्च टैब -->
+    <div id="screen-kharch" class="screen">
+        <h3>🛒 घर खर्च इतिहास (History)</h3>
+        <div class="tools-bar">
+            <input type="text" id="searchKharch" placeholder="🔍 खर्च खोजें..." oninput="filterAndRender()">
+            <button onclick="openModal('kharchModal')" class="action-btn" style="background:#007bff; color:white; width: auto; padding: 10px 18px;">+ नया खर्च</button>
+        </div>
+        <div class="tools-bar" style="margin-top:0;">
+            <select id="filterCategoryKharch" onchange="filterAndRender()">
+                <option value="all">सभी कैटेगरी</option>
+                <option value="Grocery">किराना</option>
+                <option value="Bills">बिल्स</option>
+                <option value="Medical">मेडिकल</option>
+                <option value="OtherKharch">अन्य</option>
+            </select>
+        </div>
+        <div class="transaction-list"><div id="kharchHistory">डेटा लोड हो रहा है...</div></div>
+    </div>
+</div>
+
+<!-- बॉटम नेविगेशन बार -->
+<div class="nav-bar">
+    <button class="nav-item active" onclick="switchScreen('dashboard', this)"><span>📊</span> डैशबोर्ड</button>
+    <button class="nav-item" onclick="switchScreen('salary', this)"><span>💰</span> सैलरी</button>
+    <button class="nav-item" onclick="switchScreen('lenden', this)"><span>👥</span> उधारी</button>
+    <button class="nav-item" onclick="switchScreen('kharch', this)"><span>🛒</span> खर्च</button>
+</div>
+
+<div id="toast">संदेश</div>
+
+<!-- Firebase Logic Script -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDnP9Ai-MBKBsH9u2olmbaUus50mty8VWI",
+        authDomain: "calcugenius-llgpi.firebaseapp.com",
+        databaseURL: "https://calcugenius-llgpi-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "calcugenius-llgpi",
+        storageBucket: "calcugenius-llgpi.firebasestorage.app",
+        messagingSenderId: "1096286291409",
+        appId: "1:1096286291409:web:6dbbe76f04f19e7c2d0cf0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.globalTransactions = [];
+
+    window.processSaveData = function(typeCat) {
+        let data, dateVal;
+        if(typeCat === 'Salary') {
+            dateVal = document.getElementById('sl_date').value;
+            data = {
+                name: document.getElementById('sl_name').value,
+                type: 'Income',
+                amount: parseFloat(document.getElementById('sl_amount').value),
+                category: 'Salary',
+                date: dateVal,
+                note: document.getElementById('sl_note').value,
+                timestamp: new Date(dateVal).getTime() || Date.now()
+            };
+        } else if(typeCat === 'Lenden') {
+            dateVal = document.getElementById('ld_date').value;
+            data = {
+                name: document.getElementById('ld_name').value,
+                type: document.getElementById('ld_type').value,
+                amount: parseFloat(document.getElementById('ld_amount').value),
+                category: 'Udhar',
+                date: dateVal,
+                note: document.getElementById('ld_note').value,
+                timestamp: new Date(dateVal).getTime() || Date.now()
+            };
+        } else {
+            dateVal = document.getElementById('kh_date').value;
+            data = {
+                name: document.getElementById('kh_name').value,
+                type: 'Dena',
+                amount: parseFloat(document.getElementById('kh_amount').value),
+                category: document.getElementById('kh_category').value,
+                date: dateVal,
+                note: document.getElementById('kh_note').value,
+                timestamp: new Date(dateVal).getTime() || Date.now()
+            };
+        }
+
+        const dbRef = ref(db, 'transactions');
+        push(dbRef, data)
+            .then(() => {
+                showToast('✔ डेटा सफलतापूर्व सेव हो गया!');
+                if(typeCat === 'Salary') {
+                    closeModal('salaryModal');
+                    document.getElementById('salaryForm').reset();
+                } else if(typeCat === 'Lenden') {
+                    closeModal('lendenModal');
+                    document.getElementById('lendenForm').reset();
+                } else {
+                    closeModal('kharchModal');
+                    document.getElementById('kharchForm').reset();
+                }
+                setDefaultDates();
+            })
+            .catch((error) => {
+                showToast('❌ त्रुटि: ' + error.message, true);
+            });
+    };
+
+    window.loadFirebaseData = function() {
+        const dbRef = ref(db, 'transactions');
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val();
+            window.globalTransactions = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    window.globalTransactions.push({
+                        id: key,
+                        ...data[key]
+                    });
+                });
+            }
+            filterAndRender();
+            calculateSummary(window.globalTransactions);
+        });
+    };
+
+    window.processDeleteEntry = function(id) {
+        const itemRef = ref(db, 'transactions/' + id);
+        remove(itemRef)
+            .then(() => showToast('✔ एंट्री डिलीट हो गई!'))
+            .catch(() => showToast('❌ त्रुटि', true));
+    };
+
+    window.processUpdateAmount = function(id, newAmount) {
+        const itemRef = ref(db, 'transactions/' + id);
+        update(itemRef, { amount: parseFloat(newAmount) })
+            .then(() => showToast('✔ हिसाब अपडेट हो गया!'))
+            .catch(() => showToast('❌ अपडेट त्रुटि', true));
+    };
+
+    window.loadFirebaseData();
+</script>
+
+<script>
+    function setDefaultDates() {
+        const today = new Date().toISOString().split('T')[0];
+        if(document.getElementById('sl_date')) document.getElementById('sl_date').value = today;
+        if(document.getElementById('ld_date')) document.getElementById('ld_date').value = today;
+        if(document.getElementById('kh_date')) document.getElementById('kh_date').value = today;
+    }
+    setDefaultDates();
+
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    if (!localStorage.getItem('loginPin')) {
+        document.getElementById('lockTitle').innerText = "🆕 नया लॉगिन पिन सेट करें";
+    }
+
+    function submitLockPin() {
+        const entered = document.getElementById('modalPinInput').value;
+        const saved = localStorage.getItem('loginPin');
+        if (!saved) {
+            if (entered.length === 4) {
+                localStorage.setItem('loginPin', entered);
+                if(!localStorage.getItem('txnPin')) localStorage.setItem('txnPin', '5678');
+                showToast('✔ पिन सेट हो गया! (Txn PIN: 5678)');
+                document.getElementById('lockModal').style.display = 'none';
+            } else { showToast('4 अंकों का पिन दर्ज करें', true); }
+        } else {
+            if (entered === saved) {
+                document.getElementById('lockModal').style.display = 'none';
+            } else { showToast('❌ गलत पिन!', true); document.getElementById('modalPinInput').value = ''; }
+        }
+    }
+
+    function handleFormSubmit(e, typeCat) {
+        e.preventDefault();
+        verifyTxnPin(() => {
+            if(window.processSaveData) window.processSaveData(typeCat);
+        });
+    }
+
+    function verifyTxnPin(callback) {
+        const modal = document.getElementById('promptModal');
+        document.getElementById('promptTitle').innerText = "🔒 सुरक्षा जाँच";
+        document.getElementById('promptDesc').innerText = "अपना 4-अंकों का ट्रांजैक्शन पिन दर्ज करें:";
+        document.getElementById('promptInputsContainer').innerHTML = `<input type="password" id="customTxnPin" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 10px;">`;
+        modal.style.display = 'flex';
+
+        document.getElementById('promptSubmitBtn').onclick = function() {
+            const val = document.getElementById('customTxnPin').value;
+            const correctPin = localStorage.getItem('txnPin') || '5678';
+            if (val === correctPin) {
+                modal.style.display = 'none';
+                callback();
+            } else {
+                showToast('❌ गलत पिन!', true);
+            }
+        };
+    }
+
+    function openResetPinModal() {
+        const modal = document.getElementById('promptModal');
+        document.getElementById('promptTitle').innerText = "🔑 पिन बदलें";
+        document.getElementById('promptDesc').innerText = "पुराना और नए पिन दर्ज करें:";
+        document.getElementById('promptInputsContainer').innerHTML = `
+            <input type="password" id="oldLogin" placeholder="पुराना लॉगिन पिन" maxlength="4" style="margin-bottom:8px;">
+            <input type="password" id="newLogin" placeholder="नया लॉगिन पिन (4 अंक)" maxlength="4" style="margin-bottom:8px;">
+            <input type="password" id="newTxn" placeholder="नया ट्रांजैक्शन पिन (4 अंक)" maxlength="4">
+        `;
+        modal.style.display = 'flex';
+
+        document.getElementById('promptSubmitBtn').onclick = function() {
+            const oLog = document.getElementById('oldLogin').value;
+            const nLog = document.getElementById('newLogin').value;
+            const nTxn = document.getElementById('newTxn').value;
+            if (oLog === localStorage.getItem('loginPin') && nLog.length === 4 && nTxn.length === 4) {
+                localStorage.setItem('loginPin', nLog);
+                localStorage.setItem('txnPin', nTxn);
+                modal.style.display = 'none';
+                showToast('✔ पिन बदल गया!');
+            } else { showToast('❌ पिन गलत हैं', true); }
+        };
+    }
+
+    function closePromptModal() { document.getElementById('promptModal').style.display = 'none'; }
+    function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+
+    function showConfirm(text, callback) {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmText').innerText = text;
+        modal.style.display = 'flex';
+        document.getElementById('confirmYesBtn').onclick = function() {
+            modal.style.display = 'none';
+            callback();
+        };
+    }
+
+    function showToast(msg, isErr = false) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.backgroundColor = isErr ? '#d9534f' : '#28a745';
+        t.className = "show";
+        setTimeout(() => t.className = "", 3000);
+    }
+
+    function toggleTheme() {
+        const b = document.body;
+        const btn = document.getElementById('themeIconBtn');
+        if(b.getAttribute('data-theme') === 'light') {
+            b.setAttribute('data-theme', 'dark');
+            btn.innerText = '☀️';
+        } else {
+            b.setAttribute('data-theme', 'light');
+            btn.innerText = '🌙';
+        }
+    }
+
+    function switchScreen(screenName, btn) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('screen-' + screenName).classList.add('active');
+        if(btn) btn.classList.add('active');
+    }
+
+    function filterAndRender() {
+        const data = window.globalTransactions || [];
+        let salaryHtml = '';
+        let lendenHtml = '';
+        let kharchHtml = '';
+
+        const searchSl = document.getElementById('searchSalary').value.toLowerCase();
+        const searchLd = document.getElementById('searchLenden').value.toLowerCase();
+        const monthLd = document.getElementById('filterMonthLenden').value;
+        const searchKh = document.getElementById('searchKharch').value.toLowerCase();
+        const catKh = document.getElementById('filterCategoryKharch').value;
+
+        const sorted = [...data].sort((a, b) => b.timestamp - a.timestamp);
+        const now = new Date();
+
+        sorted.forEach(row => {
+            const rowDate = new Date(row.timestamp || Date.now());
+            const displayDate = row.date || rowDate.toLocaleDateString();
+
+            if (row.category === 'Salary') {
+                if (searchSl && !row.name.toLowerCase().includes(searchSl)) return;
+                salaryHtml += `
+                    <div class="item">
+                        <div class="item-info">
+                            <strong>${row.name}</strong> <small>[सैलरी]</small>
+                            <small>${row.note || '-'} | ${displayDate}</small>
+                        </div>
+                        <div class="item-right">
+                            <span class="text-income">₹${row.amount}</span>
+                            <div class="btn-group">
+                                <button class="edit-btn" onclick="promptUpdate('${row.id}', ${row.amount})">अपडेट</button>
+                                <button class="del-btn" onclick="deleteEntry('${row.id}')">डिलीट</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (row.category === 'Udhar') {
+                if (searchLd && !row.name.toLowerCase().includes(searchLd)) return;
+                if (monthLd === 'current') {
+                    if (rowDate.getMonth() !== now.getMonth() || rowDate.getFullYear() !== now.getFullYear()) return;
+                }
+                lendenHtml += `
+                    <div class="item">
+                        <div class="item-info">
+                            <strong>${row.name}</strong> <small>[उधार]</small>
+                            <small>${row.note || '-'} | ${displayDate}</small>
+                        </div>
+                        <div class="item-right">
+                            <span class="${row.type === 'Lena' ? 'text-lena' : 'text-dena'}">₹${row.amount} (${row.type === 'Lena' ? 'लेना है' : 'देना है'})</span>
+                            <div class="btn-group">
+                                <button class="edit-btn" onclick="promptUpdate('${row.id}', ${row.amount})">अपडेट</button>
+                                <button class="del-btn" onclick="deleteEntry('${row.id}')">डिलीट</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                if (searchKh && !row.name.toLowerCase().includes(searchKh)) return;
+                if (catKh !== 'all' && row.category !== catKh) return;
+                kharchHtml += `
+                    <div class="item">
+                        <div class="item-info">
+                            <strong>${row.name}</strong> <small>[${row.category}]</small>
+                            <small>${row.note || '-'} | ${displayDate}</small>
+                        </div>
+                        <div class="item-right">
+                            <span class="text-dena">₹${row.amount}</span>
+                            <div class="btn-group">
+                                <button class="edit-btn" onclick="promptUpdate('${row.id}', ${row.amount})">अपडेट</button>
+                                <button class="del-btn" onclick="deleteEntry('${row.id}')">डिलीट</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('salaryHistory').innerHTML = salaryHtml || 'कोई सैलरी डेटा नहीं है।';
+        document.getElementById('lendenHistory').innerHTML = lendenHtml || 'कोई उधार डेटा नहीं है।';
+        document.getElementById('kharchHistory').innerHTML = kharchHtml || 'कोई खर्च डेटा नहीं है।';
+    }
+
+    function promptUpdate(id, currentAmt) {
+        verifyTxnPin(() => {
+            const modal = document.getElementById('promptModal');
+            document.getElementById('promptTitle').innerText = "✏️ रकम अपडेट करें";
+            document.getElementById('promptDesc').innerText = "नई कुल रकम दर्ज करें:";
+            document.getElementById('promptInputsContainer').innerHTML = `<input type="number" id="updateAmtInput" value="${currentAmt}" style="text-align: center; font-size: 20px; padding: 12px;">`;
+            modal.style.display = 'flex';
+
+            document.getElementById('promptSubmitBtn').onclick = function() {
+                const val = document.getElementById('updateAmtInput').value;
+                if(val && !isNaN(val)) {
+                    modal.style.display = 'none';
+                    window.processUpdateAmount(id, val);
+                } else {
+                    showToast('सही रकम डालें', true);
+                }
+            };
+        });
+    }
+
+    function deleteEntry(id) {
+        verifyTxnPin(() => {
+            showConfirm('क्या आप वाकई इसे डिलीट करना चाहते हैं?', () => {
+                window.processDeleteEntry(id);
+            });
+        });
+    }
+
+    function calculateSummary(data) {
+        let totalIncome = 0, totalLena = 0, totalDena = 0, totalKharch = 0;
+        data.forEach(row => {
+            if(row.category === 'Salary') {
+                totalIncome += Number(row.amount);
+            } else if(row.category === 'Udhar') {
+                if(row.type === 'Lena') {
+                    totalLena += Number(row.amount);
+                } else {
+                    totalDena += Number(row.amount);
+                }
+            } else {
+                totalKharch += Number(row.amount);
+            }
+        });
+        
+        const pocketBalance = totalIncome + totalDena - totalKharch - totalLena;
+        const totalWealth = pocketBalance + totalLena;
+
+        document.getElementById('totalBalance').innerText = '₹' + pocketBalance;
+        document.getElementById('totalWealthText').innerText = `कुल संपत्ति (Net Worth): ₹${totalWealth}`;
+        document.getElementById('totalIncome').innerText = '₹' + totalIncome;
+        document.getElementById('totalKharchCard').innerText = '₹' + totalKharch;
+        document.getElementById('totalLena').innerText = '₹' + totalLena;
+        document.getElementById('totalDena').innerText = '₹' + totalDena;
+
+        document.getElementById('expenseSummaryText').innerText = `कुल घर खर्च: ₹${totalKharch}`;
+        document.getElementById('expenseBar').style.width = Math.min(100, (totalKharch / (totalIncome || 1)) * 100) + '%';
+    }
+
+    function exportJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.globalTransactions, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", "HomeLedger_Backup.json");
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast('✔ बैकअप फाइल डाउनलोड हो गई!');
+    }
+
+    function shareWhatsApp() {
+        let text = `*🏠 Home Ledger रिपोर्ट*\n\n💵 हाथ में नकद (Pocket): ${document.getElementById('totalBalance').innerText}\n💰 कुल सैलरी: ${document.getElementById('totalIncome').innerText}\n🛒 कुल खर्च: ${document.getElementById('totalKharchCard').innerText}\n🔴 लेना है: ${document.getElementById('totalLena').innerText}\n🟢 देना है: ${document.getElementById('totalDena').innerText}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function exportPDF() { window.print(); }
+</script>
+
+</body>
+</html>
