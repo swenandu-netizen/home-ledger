@@ -612,7 +612,7 @@
     function verifyTxnPin(callback) {
         const modal = document.getElementById('promptModal');
         document.getElementById('promptTitle').innerText = "🔒 सुरक्षा जाँच";
-        document.getElementById('promptDesc').innerText = "अपना 4-अंकों का ट्रांजैक्शन पिन दर्ज करें (4511):";
+        document.getElementById('promptDesc').innerText = "अपना 4-अंकों का ट्रांजैक्शन पिन दर्ज करें :";
         document.getElementById('promptInputsContainer').innerHTML = `<input type="password" id="customTxnPin" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 10px;">`;
         modal.style.display = 'flex';
 
